@@ -29,7 +29,14 @@ class BookInstanceAdmin(admin.ModelAdmin):
         }),
     )
 
+
+class BookInline(admin.StackedInline):
+    model = Book
+    extra = 0
+
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('last_name', 'first_name', ('date_of_birth', 'date_of_death'))
+    list_display = ('last_name', 'first_name', 'date_of_birth', 'date_of_death')
+    fields = ('last_name', 'first_name', ('date_of_birth', 'date_of_death'))
+    inlines = [BookInline]
 
