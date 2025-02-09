@@ -46,6 +46,14 @@ class Book(models.Model):
         """
         return reverse('book-detail', args=[str(self.id)])
 
+    def display_genre(self):
+        """
+        Creates a string for the Genre. This is requires to display genre in Admin.
+        """
+        return ', '.join([genre.name for genre in self.genre.all()[:3]])
+
+    display_genre.short_description = 'Жанр'
+
 
 class BookInstance(models.Model):
     """
@@ -55,7 +63,7 @@ class BookInstance(models.Model):
                           default=uuid.uuid4,
                           help_text='Unique ID for this particular book across whole library')
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, verbose_name='Книга')
-    imprint = models.CharField(max_length=200, verbose_name='Издание')
+    imprint = models.CharField(max_length=200, verbose_name='Издательство')
     due_back = models.DateField(null=True, blank=True, verbose_name='Дата возврата')
 
     LOAN_STATUS = (
