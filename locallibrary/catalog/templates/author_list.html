@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+{% block content %}
+  <h1>{{ title }}</h1>
+
+  {% if authors %}
+  <ul>
+
+    {% for author in authors %}
+    <li>
+      <a href="{{ author.get_absolute_url }}">{{ author.first_name }} {{ author.last_name }}</a>
+    </li>
+    {% endfor %}
+
+  </ul>
+  {% else %}
+    <p>Не найдено ни одной книги, и соответственно ни одного автора!</p>
+  {% endif %}
+{% endblock content %}

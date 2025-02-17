@@ -25,7 +25,13 @@ class Book(models.Model):
     Model representing a book (but not a specific copy of a book).
     """
     title = models.CharField(max_length=200, verbose_name='Название книги')
-    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True, verbose_name='Автор книги')
+    author = models.ForeignKey(
+        'Author',
+        on_delete=models.SET_NULL,
+        null=True,
+        # related_name='%(class)s_author',
+        verbose_name='Автор книги'
+    )
     summary = models.TextField(max_length=1000, help_text='Enter a brief description of the book', verbose_name='Описание книги')
     isbn = models.CharField('ISBN', max_length=13, help_text='13 Character <a href-"https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
     genre = models.ManyToManyField(Genre, help_text='Select a genre for this book', verbose_name='Жанр')
@@ -44,7 +50,7 @@ class Book(models.Model):
         """
         Returns the url to access a particular book instance.
         """
-        return reverse('book-detail', args=[str(self.id)])
+        return reverse('book_detail', args=[str(self.id)])
 
     def display_genre(self):
         """
@@ -59,6 +65,7 @@ class BookInstance(models.Model):
     """
     Model representing a specific copy of a book.
     """
+
     id = models.UUIDField(primary_key=True,
                           default=uuid.uuid4,
                           help_text='Unique ID for this particular book across whole library')
@@ -95,16 +102,18 @@ class Author(models.Model):
     last_name = models.CharField(max_length=100, verbose_name='Фамилия')
     date_of_birth = models.DateField(null=True, blank=True, verbose_name='Дата рождения')
     date_of_death = models.DateField(null=True, blank=True, verbose_name='Дата смерти')
+    # written_books = models.ManyToManyField(Book, verbose_name='Книги')
 
     class Meta:
         verbose_name = 'автор'
         verbose_name_plural = 'Авторы'
+        ordering = ['last_name']
 
     def get_absolute_url(self):
         """
         Returns the url to access a particular author instance.
         """
-        return reverse('author-detail', args=[str(self.id)])
+        return reverse('author_detail', args=[str(self.id)])
 
     def __str__(self):
         """
@@ -130,4 +139,4 @@ class Language(models.Model):
         return f'{self.name}'
 
     def get_absolute_url(self):
-        return reverse('language-detail', args=[str(self.id)])
+        return reverse('language_detail', args=[str(self.id)])
