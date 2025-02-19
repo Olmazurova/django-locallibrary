@@ -19,4 +19,10 @@
     <li><strong>Книги со словом "и":</strong> {{ num_books_with_and }}</li>
   </ul>
 
+    <p>You have visited this page {{ num_visits }}
+        {% if num_visits == 1 %} time
+        {% else %} times
+        {% endif %}.
+    </p>
+
 {% endblock %}

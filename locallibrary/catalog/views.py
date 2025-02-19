@@ -73,10 +73,12 @@ def index(request):
     # Доступные книги (статус "а")
     num_instances_available = BookInstance.objects.filter(status__exact='a').count()
 
-    print(num_instances_available)
     num_authors = Author.objects.count()
     num_genres = Genre.objects.count()
     num_books_with_and = Book.objects.filter(title__contains=' и ').count()
+    # Session
+    num_visits=request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
     return render(
         request,
         'index.html',
@@ -87,5 +89,6 @@ def index(request):
             'num_authors': num_authors,
             'num_genres': num_genres,
             'num_books_with_and': num_books_with_and,
+            'num_visits': num_visits,
         }
     )
