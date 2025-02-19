@@ -6,8 +6,9 @@
     <p><strong>Дата рождения:</strong> {{ author.date_of_birth }} </p>
     <p><strong>Дата смерти:</strong> {{ author.date_of_death }} </p>
     <p><strong>Книги:</strong>
-        {% for book in author.written_books.all %}
-        <li> <a href="{% url 'book_detail' book.pk %}">{{ book }}</a></li>
+{#    Как здесь сделать выборку книг по каждому автору?#}
+        {% for book in author.book_set.all %}
+        <li> <a href="{% url 'book_detail' book.pk %}">{{ book.title }}</a></li>
         {% endfor %}</p>
 
 {% endblock content %}

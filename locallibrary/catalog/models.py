@@ -102,7 +102,7 @@ class Author(models.Model):
     last_name = models.CharField(max_length=100, verbose_name='Фамилия')
     date_of_birth = models.DateField(null=True, blank=True, verbose_name='Дата рождения')
     date_of_death = models.DateField(null=True, blank=True, verbose_name='Дата смерти')
-    # written_books = models.ManyToManyField(Book, verbose_name='Книги')
+
 
     class Meta:
         verbose_name = 'автор'
