@@ -84,12 +84,13 @@ class BookInstance(models.Model):
     )
 
     status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='m', help_text='Book availability', verbose_name='Статус')
-    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Используется')
 
     class Meta:
         ordering = ['due_back']
         verbose_name = 'экземпляр'
         verbose_name_plural = 'Экземпляры книг'
+        permissions = (('can_mark_returned', 'Set book as returned'),)
 
     def __str__(self):
         """

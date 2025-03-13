@@ -21,18 +21,26 @@
         <div class="col-sm-2">
           {% block sidebar %}
             <ul class="sidebar-nav">
-              <li><a href="{% url 'index' %}">Home</a></li>
-              <li><a href="{% url 'books' %}">All books</a></li>
-              <li><a href="{% url 'authors' %}">All authors</a></li>
+              <li><a href="{% url 'index' %}">Главная</a></li>
+              <li><a href="{% url 'books' %}">Все книги</a></li>
+              <li><a href="{% url 'authors' %}">Все авторы</a></li>
+            </ul>
+              <ul class="sidebar-nav">
             {% if user.is_authenticated %}
                 <li>User: {{ user.get_username }}</li>
-                <li><a href="{% url 'my_borrowed' %}">My Borrowed</a></li>
+                <li><a href="{% url 'my_borrowed' %}">В моём пользовании</a></li>
                 <li><a href="{% url 'logout'%}?next={{request.path}}">Выход</a></li>
                 <li><a href="{% url 'login'%}?next={{request.path}}">Сменить учётную запись</a>
             {% else %}
                 <li><a href="{% url 'login'%}?next={{request.path}}">Вход</a></li>
             {% endif %}
             </ul>
+
+              <ul class="sidebar-nav">
+              {% if user.is_staff %}
+                <li>Для библиотекаря:</li>
+                <li><a href="{% url 'all_borrowed' %}">Все используемые книги</a></li>
+              {% endif %}
           {% endblock sidebar %}
         </div>
         <div class="col-sm-10 ">{% block content %}{% endblock %}

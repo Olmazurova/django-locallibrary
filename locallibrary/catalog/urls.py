@@ -9,6 +9,12 @@ urlpatterns = [
     path('authors/', views.AuthorListView.as_view(), name='authors'),
     re_path(r'^author/(?P<pk>\d+)$', views.AuthorDetailView.as_view(), name='author_detail'),
     re_path(r'^mybooks/$', views.LoanedBooksByUserListView.as_view(), name='my_borrowed'),
-    # re_path(r'^/url/$', views.my_reused_view, {'my_template_name': 'some_path'}, name='aurl'),
-    # re_path(r'^/anotherurl/$', views.my_reused_view, {'my_template_name': 'another_path'}, name='anotherurl'),
+    re_path(r'^borrowed_books/$', views.LoanedAllBooksListView.as_view(), name='all_borrowed'),
+    re_path(r'^book/(?P<pk>[-\w]+)/renew/$', views.renew_book_librarian, name='renew-book-librarian'),
+]
+
+urlpatterns += [
+    re_path(r'^author/create/$', views.AuthorCreate.as_view(), name='author_create'),
+    re_path(r'^author/(?P<pk>\d+)/update/$', views.AuthorUpdate.as_view(), name='author_update'),
+    re_path(r'^author/(?P<pk>\d+)/delete/$', views.AuthorDelete.as_view(), name='author_delete'),
 ]

@@ -1,11 +1,19 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
-from django.views import generic
+import datetime
 
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView
+from django.urls import reverse, reverse_lazy
+
+from .forms import RenewBookForm
 from .models import Book, Author, BookInstance, Genre
 
 
-class BookListView(generic.ListView):
+class BookListView(ListView):
     """Класс отображения, выводит список информации по книгам."""
 
     model = Book
@@ -29,14 +37,14 @@ class BookListView(generic.ListView):
         return Book.objects.all()[:11]
 
 
-class BookDetailView(generic.DetailView):
+class BookDetailView(DetailView):
     """Обобщённый класс отображения для вывода информации по конкретной книге."""
 
     model = Book
     template_name = 'book_detail.html'
 
 
-class AuthorListView(generic.ListView):
+class AuthorListView(ListView):
     """
     Класс отображения выводит список авторов, чьи книги имеются в библиотеке.
     """
@@ -54,7 +62,7 @@ class AuthorListView(generic.ListView):
         return context
 
 
-class AuthorDetailView(generic.DetailView):
+class AuthorDetailView(DetailView):
     """
     Класс отображения выводит информацию о конкретном авторе.
     """
@@ -63,7 +71,7 @@ class AuthorDetailView(generic.DetailView):
     template_name = 'author_detail.html'
 
 
-class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
+class LoanedBooksByUserListView(LoginRequiredMixin, ListView):
     """
     Базовый класс представления списка взятых книг текущего пользователя.
     """
@@ -77,6 +85,43 @@ class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
         ).filter(
             status__exact='o'
         ).order_by('due_back')
+
+
+class LoanedAllBooksListView(LoginRequiredMixin, ListView):
+    """
+    Базовый класс представления списка всех взятых книг в библиотеке.
+    """
+    model = BookInstance
+    permission_required = 'catalog.can_mark_returned'
+    template_name = 'bookinstance_list_borrowed_user.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(
+            Q(status__exact='o') | Q(status__exact='m')
+        ).order_by('due_back')
+
+
+class AuthorCreate(CreateView):
+    model = Author
+    fields = '__all__'
+    initial = {'date_of_death': '12/10/2016',}  # начальное значение поля в форме
+
+
+class AuthorUpdate(UpdateView):
+    model = Author
+    fields = [
+        'first_name',
+        'last_name',
+        'date_of_birth',
+        'date_of_death',
+    ]
+
+
+class AuthorDelete(DeleteView):
+    model = Author
+    success_url = reverse_lazy('authors')
+
 
 def index(request):
     """
@@ -108,3 +153,39 @@ def index(request):
             'num_visits': num_visits,
         }
     )
+
+
+@permission_required('catalog.can_mark_returned')
+def renew_book_librarian(request, pk):
+    """
+    Представление формы для изменения библиотекарем
+    даты возврата экземпляра книги.
+    """
+    book_inst = get_object_or_404(BookInstance, pk=pk)
+
+    # Если данный запрос типа POST, тогда
+    if request.method == 'POST':
+        # Создаём экземпляр формы и заполняем данными из запроса (связывние, binding)
+        form = RenewBookForm(request.POST)
+
+        # Проверка валидности
+        if form.is_valid():
+            # Обработка данных из form.cleaned_data
+            # (здесь мф просто присваиваем их полю due_back)
+            book_inst.due_back = form.cleaned_data['renewal_date']
+            book_inst.save()
+
+            # Переход по адресу 'all_borrowed':
+            return HttpResponseRedirect(reverse('all_borrowed'))
+
+    # Если это GET (или другой запрос), создать форму по умолчанию.
+    else:
+        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
+
+        return render(
+            request,
+            'catalog/book_renew_librarian.html',
+            {'form': form, 'bookinst': book_inst,}
+        )
+
